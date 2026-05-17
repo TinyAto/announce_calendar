@@ -20,6 +20,7 @@ class Command(BaseCommand):
         error_count = 0
 
         for msg in messages:
+            print(f"메시지 : {msg}")
             try:
                 if summarize_message(msg):
                     success_count += 1
