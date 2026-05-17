@@ -14,10 +14,37 @@
     </form>
 </div>
 {% if channels %}
+<style>
+    .public-channel-row {
+        background: #fff7d6;
+    }
+    .channel-id-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .channel-id {
+        font-family: Consolas, Monaco, monospace;
+        font-size: 0.85rem;
+        word-break: break-all;
+    }
+    .copy-channel-id {
+        border: 1px solid #ccc;
+        background: #fff;
+        border-radius: 4px;
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+        white-space: nowrap;
+    }
+    .copy-channel-id:hover {
+        background: #f0f0f0;
+    }
+</style>
 <div class="card">
     <table>
         <thead>
             <tr>
+                <th>채널 ID</th>
                 <th>이름</th>
                 <th>표시 이름</th>
                 <th>타입</th>
@@ -26,7 +53,13 @@
         </thead>
         <tbody>
             {% for ch in channels %}
-            <tr>
+            <tr{% if ch.type == "O" %} class="public-channel-row"{% endif %}>
+                <td>
+                    <div class="channel-id-cell">
+                        <span class="channel-id">{{ ch.id }}</span>
+                        <button type="button" class="copy-channel-id" data-channel-id="{{ ch.id }}">복사</button>
+                    </div>
+                </td>
                 <td>{{ ch.name }}</td>
                 <td>{{ ch.display_name }}</td>
                 <td>{{ ch.type }}</td>
@@ -36,5 +69,32 @@
         </tbody>
     </table>
 </div>
+<script>
+    document.querySelectorAll(".copy-channel-id").forEach((button) => {
+        button.addEventListener("click", async () => {
+            const channelId = button.dataset.channelId;
+            const originalText = button.textContent;
+
+            try {
+                await navigator.clipboard.writeText(channelId);
+                button.textContent = "복사됨";
+            } catch (error) {
+                const textarea = document.createElement("textarea");
+                textarea.value = channelId;
+                textarea.style.position = "fixed";
+                textarea.style.opacity = "0";
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand("copy");
+                document.body.removeChild(textarea);
+                button.textContent = "복사됨";
+            }
+
+            window.setTimeout(() => {
+                button.textContent = originalText;
+            }, 1200);
+        });
+    });
+</script>
 {% endif %}
 {% endblock %}
