@@ -38,6 +38,9 @@ class Command(BaseCommand):
                 if text == "":
                     skipped_count += 1
                     continue
+                if post.get("type", "").startswith("system_"):
+                    skipped_count += 1
+                    continue
 
                 props = post.get("props", {})
                 username = (
@@ -65,5 +68,5 @@ class Command(BaseCommand):
 
             self.stdout.write(
                 f"채널 {channel_id}: {saved_count}개 저장, "
-                f"{skipped_count}개 스킵(빈 메시지)"
+                f"{skipped_count}개 스킵(빈 메시지/시스템 메시지)"
             )

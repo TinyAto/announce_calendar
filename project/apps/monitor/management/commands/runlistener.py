@@ -11,6 +11,7 @@ from django.conf import settings
 from ...models import Message
 from ...services.chrome_auth import ChromeAuthExtractor
 from ...services.reconnect import ReconnectManager
+from ...services.ai_summarizer import summarize_message
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +31,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         from dotenv import load_dotenv
-        load_dotenv()
+        load_dotenv(override=True)
 
         server_url = os.getenv("MATTERMOST_URL")
         if not server_url:
@@ -103,7 +104,7 @@ class Command(BaseCommand):
                 else:
                     created_at = datetime.now(tz=timezone.utc)
 
-                Message.objects.update_or_create(
+                msg, created = Message.objects.update_or_create(
                     message_id=msg_data["message_id"],
                     defaults={
                         "channel_id": msg_data["channel_id"],
@@ -115,6 +116,11 @@ class Command(BaseCommand):
                     },
                 )
                 self.stdout.write(f"[{msg_data['username']}] {msg_data['text'][:80]}")
+                if created:
+                    try:
+                        summarize_message(msg)
+                    except Exception as e:
+                        logger.error("Error summarizing message: %s", e)
             except Exception as e:
                 logger.error("Error saving message: %s", e)
 
