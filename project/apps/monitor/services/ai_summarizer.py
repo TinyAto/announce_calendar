@@ -43,7 +43,7 @@ def summarize_message(message: Message):
 5. 시작일, 마감일, 행사일, 제출기한 등 일정으로 등록할 만한 정보가 없는 메시지
 
 [처리 대상인 경우]
-메시지가 새로운 일정, 행사, 제출, 신청, 마감, 시작일, 데드라인 등을 알리는 공지일 때만 JSON을 반환해라.
+메시지가 채용공고, 새로운 일정, 행사, 제출, 신청, 마감, 시작일, 데드라인 등을 알리는 공지일 때만 JSON을 반환해라.
 
 반환 형식은 반드시 아래 필드만 포함한 JSON이어야 한다.
 다른 설명, 참고 사항, 문장은 절대 추가하지 마라.
@@ -58,9 +58,8 @@ def summarize_message(message: Message):
 1. 날짜 형식은 sqlite3 DATETIME 형식인 "YYYY-MM-DD HH:MM:SS"로 작성해라.
 2. 시작 시간이 없으면 start_dt는 빈 문자열로 작성해라.
 3. 마감 시간이 없으면 deadline_dt는 빈 문자열로 작성해라.
-4. 날짜 정보가 전혀 없으면 처리 대상이 아니므로 반드시 {{}}만 반환해라.
-5. summary는 150자 내외로 간략히 작성해라.
-6. JSON 외의 내용은 절대 말하지 마라.
+4. summary는 150자 내외로 간략히 작성해라.
+5. JSON 외의 내용은 절대 말하지 마라.
 
 예시:
 - "OOO님이 채널에 참가했습니다" -> {{}}
@@ -89,7 +88,7 @@ def summarize_message(message: Message):
         api_url,
         headers=headers,
         json=payload,
-        timeout=30
+        timeout=180
     )
 
     print(response.status_code)
