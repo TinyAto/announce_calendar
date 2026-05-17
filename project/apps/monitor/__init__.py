@@ -1,1 +1,1 @@
-default_app_config = "monitor.apps.MonitorConfig"
+default_app_config = "apps.monitor.apps.MonitorConfig"

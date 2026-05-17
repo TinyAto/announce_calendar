@@ -8,9 +8,9 @@ from datetime import datetime, timezone
 from django.core.management.base import BaseCommand
 from django.conf import settings
 
-from monitor.models import Message
-from monitor.services.chrome_auth import ChromeAuthExtractor
-from monitor.services.reconnect import ReconnectManager
+from apps.monitor.models import Message
+from apps.monitor.services.chrome_auth import ChromeAuthExtractor
+from apps.monitor.services.reconnect import ReconnectManager
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +71,7 @@ class Command(BaseCommand):
             return
 
         if channel_names:
-            from monitor.services.channel_api import find_channel
+            from apps.monitor.services.channel_api import find_channel
             resolved_ids = []
             for name in channel_names:
                 ch = find_channel(server_url, token, name)
