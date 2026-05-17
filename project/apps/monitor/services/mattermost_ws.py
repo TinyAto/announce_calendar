@@ -89,13 +89,18 @@ class MattermostWebSocket:
         msg_channel_id = post.get("channel_id")
         if self.channel_ids and msg_channel_id not in self.channel_ids:
             return
+        if post.get("type", "").startswith("system_"):
+            return
+        text = post.get("message", "")
+        if not text:
+            return
 
         message_data = {
             "message_id": post.get("id"),
             "channel_id": msg_channel_id,
             "user_id": post.get("user_id"),
             "username": post_data.get("sender_name") or post.get("user_id", "unknown"),
-            "text": post.get("message", ""),
+            "text": text,
             "created_at": post.get("create_at"),
             "raw": data,
         }
