@@ -77,7 +77,7 @@ class MattermostWebSocket:
             "message_id": post.get("id"),
             "channel_id": msg_channel_id,
             "user_id": post.get("user_id"),
-            "username": post.get("props", {}).get("from_webhook", "unknown"),
+            "username": post_data.get("sender_name") or post.get("user_id", "unknown"),
             "text": post.get("message", ""),
             "created_at": post.get("create_at"),
             "raw": data,
