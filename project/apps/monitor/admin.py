@@ -12,7 +12,7 @@ class MessageAdmin(admin.ModelAdmin):
 
 @admin.register(Announcement)
 class AnnouncementAdmin(admin.ModelAdmin):
-    list_display = ("title", "start_dt", "deadline_dt", "message")
-    list_filter = ("start_dt", "deadline_dt")
+    list_display = ("title", "category", "start_dt", "deadline_dt", "message")
+    list_filter = ("category", "start_dt", "deadline_dt")
     search_fields = ("title", "summary")
     readonly_fields = ("message", "created_at")
