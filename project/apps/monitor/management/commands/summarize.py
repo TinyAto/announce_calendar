@@ -21,9 +21,11 @@ class Command(BaseCommand):
 
         for msg in messages:
             try:
-                summarize_message(msg)
-                success_count += 1
-                self.stdout.write(f"[OK] {msg.text[:30]}...")
+                if summarize_message(msg):
+                    success_count += 1
+                    self.stdout.write(f"[OK] {msg.text[:30]}...")
+                else:
+                    self.stdout.write("[OK] 공지가 아닙니다.")
             except Exception as e:
                 error_count += 1
                 self.stderr.write(f"[FAIL] {msg.text[:30]}... Error: {e}")
