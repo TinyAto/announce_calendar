@@ -48,3 +48,29 @@ def find_channel(server_url, token, channel_name):
         if ch["name"] == channel_name or ch["display_name"] == channel_name:
             return ch
     return None
+
+
+def fetch_posts(server_url, token, channel_id, page=0, per_page=60):
+    base = server_url.rstrip("/")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    try:
+        resp = requests.get(
+            f"{base}/api/v4/channels/{channel_id}/posts",
+            headers=headers,
+            params={"page": page, "per_page": per_page},
+            timeout=10,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        order = data.get("order", [])
+        posts = data.get("posts", {})
+
+        return [
+            posts[post_id]
+            for post_id in reversed(order)
+            if post_id in posts
+        ]
+    except Exception as exc:
+        logger.error("Failed to fetch posts for channel %s: %s", channel_id, exc)
+        return []
