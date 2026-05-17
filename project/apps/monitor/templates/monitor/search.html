@@ -1,0 +1,33 @@
+{% extends "monitor/base.html" %}
+{% block content %}
+<h1>메시지 검색</h1>
+<div class="card">
+    <form method="get">
+        <input type="text" name="q" value="{{ keyword }}" placeholder="검색어" style="padding: 0.5rem; width: 300px;">
+        <input type="text" name="channel_id" placeholder="채널 ID (쉼표로 구분)" style="padding: 0.5rem; width: 300px;">
+        <button type="submit" style="padding: 0.5rem 1rem;">검색</button>
+    </form>
+    {% if channel_ids %}
+    <p style="margin-top: 0.5rem; color: #666;">필터: {{ channel_ids|join:", " }}</p>
+    {% endif %}
+</div>
+{% if keyword %}
+<div class="card">
+    <p>'{{ keyword }}' 검색 결과 ({{ messages|length }}건)</p>
+    {% for msg in messages %}
+    <div class="message">
+        <div class="message-header">
+            <span>
+                <span class="username">{{ msg.username }}</span>
+                <a href="{% url 'channel_messages' msg.channel_id %}" class="channel-badge">{{ msg.channel_id|truncatechars:12 }}</a>
+            </span>
+            <span class="timestamp">{{ msg.created_at|date:"Y-m-d H:i:s" }}</span>
+        </div>
+        <div class="message-text">{{ msg.text|linebreaks }}</div>
+    </div>
+    {% empty %}
+    <p>검색 결과가 없습니다.</p>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

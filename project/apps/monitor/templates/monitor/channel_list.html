@@ -1,0 +1,40 @@
+{% extends "monitor/base.html" %}
+{% block content %}
+<h1>채널 목록</h1>
+{% if error %}
+<div class="card" style="color: red;">
+    <p>오류: {{ error }}</p>
+</div>
+{% endif %}
+<div class="card">
+    <p>채널 목록을 조회하려면 Mattermost 토큰이 필요합니다.</p>
+    <form method="get">
+        <input type="text" name="token" placeholder="MATTERMOST_TOKEN" style="padding: 0.5rem; width: 400px;">
+        <button type="submit" style="padding: 0.5rem 1rem;">조회</button>
+    </form>
+</div>
+{% if channels %}
+<div class="card">
+    <table>
+        <thead>
+            <tr>
+                <th>이름</th>
+                <th>표시 이름</th>
+                <th>타입</th>
+                <th>액션</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ch in channels %}
+            <tr>
+                <td>{{ ch.name }}</td>
+                <td>{{ ch.display_name }}</td>
+                <td>{{ ch.type }}</td>
+                <td><a href="{% url 'channel_messages' ch.id %}">메시지 보기</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}

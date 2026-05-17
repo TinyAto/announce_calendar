@@ -1,0 +1,27 @@
+{% extends "monitor/base.html" %}
+{% block content %}
+<h1>최근 메시지</h1>
+<div class="card">
+    <form method="get" style="margin-bottom: 1rem;">
+        <input type="text" name="channel_id" placeholder="채널 ID (쉼표로 구분)" style="padding: 0.5rem; width: 300px;">
+        <button type="submit" style="padding: 0.5rem 1rem;">필터</button>
+    </form>
+    {% if channel_ids %}
+    <p style="color: #666; margin-bottom: 0.5rem;">필터: {{ channel_ids|join:", " }} <a href="{% url 'message_list' %}">전체 보기</a></p>
+    {% endif %}
+    {% for msg in messages %}
+    <div class="message">
+        <div class="message-header">
+            <span>
+                <span class="username">{{ msg.username }}</span>
+                <a href="{% url 'channel_messages' msg.channel_id %}" class="channel-badge">{{ msg.channel_id|truncatechars:12 }}</a>
+            </span>
+            <span class="timestamp">{{ msg.created_at|date:"Y-m-d H:i:s" }}</span>
+        </div>
+        <div class="message-text">{{ msg.text|linebreaks }}</div>
+    </div>
+    {% empty %}
+    <p>저장된 메시지가 없습니다.</p>
+    {% endfor %}
+</div>
+{% endblock %}
