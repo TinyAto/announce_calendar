@@ -122,7 +122,7 @@ def summarize_message(message: Message):
     start_dt = result.get("start_dt")
 
     if not start_dt:
-        start_dt = timezone.now()
+        start_dt = message.created_at
     else:
         start_dt = datetime.strptime(
             start_dt,
