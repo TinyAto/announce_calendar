@@ -74,12 +74,6 @@ def announcements_api(request):
     start = request.GET.get("start")
     end = request.GET.get("end")
     mattermost_url = os.getenv("MATTERMOST_URL", "").rstrip("/")
-    # category_by_channel_id = {
-    #     "ujpfnsakg7bouq4ts83pykzbxw": "공지사항",
-    #     "q18dcqbshtbz3jd4831x66cbzh": "공지사항",
-    #     "x8xcn3utn38xbqke6zz661swqa": "취업지원",
-    #     "rjfryg19dbrf7nxuuf9yxc17sy": "취업지원",
-    # }
     category = ('공지사항', '취업지원', '과목평가', '행사/이벤트')
 
     announcements = Announcement.objects.all()
