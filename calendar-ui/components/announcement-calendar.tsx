@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
+import useSWR from "swr"
 import {
   ChevronLeft,
   ChevronRight,
@@ -17,6 +18,7 @@ import {
   FolderKanban,
   RefreshCw,
   Settings2,
+  AlertCircle,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -28,6 +30,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { cn } from "@/lib/utils"
+import { API_ENDPOINTS, fetcher } from "@/lib/api"
 import type { Announcement, Category, CategoryConfig } from "@/lib/types"
 
 // 카테고리 설정
@@ -82,8 +85,8 @@ const CATEGORY_ICONS: Record<Category, React.ElementType> = {
   프로젝트: FolderKanban,
 }
 
-// Mock data
-const mockAnnouncements: Announcement[] = [
+// 폴백용 Mock data (API 실패 시 사용)
+const fallbackAnnouncements: Announcement[] = [
   {
     id: "1",
     title: "과목평가 점수 공개",
@@ -131,193 +134,6 @@ const mockAnnouncements: Announcement[] = [
     channelName: "취업지원",
     category: "취업지원",
     createdAt: "2026-05-19T08:00:00",
-  },
-  {
-    id: "5",
-    title: "과목평가 OT",
-    startDateTime: "2026-05-27T14:00:00",
-    deadlineDateTime: null,
-    summary: "과목평가 오리엔테이션이 진행됩니다. 평가 방식 및 일정을 안내합니다.",
-    originalUrl: "https://meeting.ssafy.com/channel/notice",
-    channelName: "공지사항",
-    category: "과목평가",
-    createdAt: "2026-05-25T10:00:00",
-  },
-  {
-    id: "6",
-    title: "특강 신청",
-    startDateTime: "2026-05-28T10:00:00",
-    deadlineDateTime: "2026-05-30T18:00:00",
-    summary: "이력서 작성 특강 신청이 시작됩니다. 취업 준비생 필수 참석 권장합니다.",
-    originalUrl: "https://meeting.ssafy.com/channel/job",
-    channelName: "취업지원",
-    category: "취업지원",
-    createdAt: "2026-05-27T09:00:00",
-  },
-  {
-    id: "7",
-    title: "프로젝트 킥오프",
-    startDateTime: "2026-05-29T09:00:00",
-    deadlineDateTime: null,
-    summary: "3차 프로젝트 킥오프 미팅입니다. 팀 구성 및 주제 선정이 진행됩니다.",
-    originalUrl: "https://meeting.ssafy.com/channel/project",
-    channelName: "프로젝트",
-    category: "프로젝트",
-    createdAt: "2026-05-28T10:00:00",
-  },
-  {
-    id: "8",
-    title: "취업 특강",
-    startDateTime: "2026-05-30T14:00:00",
-    deadlineDateTime: null,
-    summary: "현직 개발자와 함께하는 취업 특강입니다. 면접 준비 팁을 공유합니다.",
-    originalUrl: "https://meeting.ssafy.com/channel/job",
-    channelName: "취업지원",
-    category: "취업지원",
-    createdAt: "2026-05-29T09:00:00",
-  },
-  {
-    id: "9",
-    title: "행사 안내",
-    startDateTime: "2026-05-31T10:00:00",
-    deadlineDateTime: null,
-    summary: "SSAFY 네트워킹 데이 행사가 진행됩니다. 다양한 기업 관계자를 만나보세요.",
-    originalUrl: "https://meeting.ssafy.com/channel/event",
-    channelName: "행사/이벤트",
-    category: "행사/이벤트",
-    createdAt: "2026-05-30T10:00:00",
-  },
-  {
-    id: "10",
-    title: "이력서 특강",
-    startDateTime: "2026-06-02T14:00:00",
-    deadlineDateTime: null,
-    summary: "이력서 첨삭 특강입니다. 개별 피드백을 받을 수 있습니다.",
-    originalUrl: "https://meeting.ssafy.com/channel/job",
-    channelName: "취업지원",
-    category: "취업지원",
-    createdAt: "2026-06-01T09:00:00",
-  },
-  {
-    id: "11",
-    title: "과목평가 제출",
-    startDateTime: "2026-06-04T09:00:00",
-    deadlineDateTime: "2026-06-04T18:00:00",
-    summary: "과목평가 과제 제출 마감입니다. 기한 내 제출해주세요.",
-    originalUrl: "https://meeting.ssafy.com/channel/notice",
-    channelName: "공지사항",
-    category: "과목평가",
-    createdAt: "2026-06-03T10:00:00",
-  },
-  {
-    id: "12",
-    title: "특강 신청",
-    startDateTime: "2026-06-09T10:00:00",
-    deadlineDateTime: "2026-06-11T18:00:00",
-    summary: "알고리즘 특강 신청이 시작됩니다. 코딩테스트 대비에 유용합니다.",
-    originalUrl: "https://meeting.ssafy.com/channel/notice",
-    channelName: "공지사항",
-    category: "공지사항",
-    createdAt: "2026-06-08T09:00:00",
-  },
-  {
-    id: "13",
-    title: "과목평가 안내",
-    startDateTime: "2026-06-10T09:00:00",
-    deadlineDateTime: null,
-    summary: "다음 과목평가 일정 및 범위가 안내됩니다.",
-    originalUrl: "https://meeting.ssafy.com/channel/notice",
-    channelName: "공지사항",
-    category: "과목평가",
-    createdAt: "2026-06-09T10:00:00",
-  },
-  {
-    id: "14",
-    title: "설문 참여",
-    startDateTime: "2026-06-05T09:00:00",
-    deadlineDateTime: "2026-06-07T18:00:00",
-    summary: "교육 만족도 설문에 참여해주세요. 소정의 기프티콘이 제공됩니다.",
-    originalUrl: "https://meeting.ssafy.com/channel/event",
-    channelName: "행사/이벤트",
-    category: "행사/이벤트",
-    createdAt: "2026-06-04T10:00:00",
-  },
-  {
-    id: "15",
-    title: "모의면접 신청",
-    startDateTime: "2026-06-12T10:00:00",
-    deadlineDateTime: "2026-06-14T18:00:00",
-    summary: "모의면접 신청이 시작됩니다. 현직 면접관과 함께하는 기회입니다.",
-    originalUrl: "https://meeting.ssafy.com/channel/job",
-    channelName: "취업지원",
-    category: "취업지원",
-    createdAt: "2026-06-11T09:00:00",
-  },
-  {
-    id: "16",
-    title: "프로젝트 중간점검",
-    startDateTime: "2026-06-25T09:00:00",
-    deadlineDateTime: null,
-    summary: "프로젝트 중간 점검이 진행됩니다. 진행 상황을 공유해주세요.",
-    originalUrl: "https://meeting.ssafy.com/channel/project",
-    channelName: "프로젝트",
-    category: "프로젝트",
-    createdAt: "2026-06-24T10:00:00",
-  },
-  {
-    id: "17",
-    title: "취업 상담",
-    startDateTime: "2026-06-26T14:00:00",
-    deadlineDateTime: null,
-    summary: "1:1 취업 상담이 진행됩니다. 사전 신청자에 한해 참여 가능합니다.",
-    originalUrl: "https://meeting.ssafy.com/channel/job",
-    channelName: "취업지원",
-    category: "취업지원",
-    createdAt: "2026-06-25T09:00:00",
-  },
-  {
-    id: "18",
-    title: "과목평가 피드백",
-    startDateTime: "2026-06-18T14:00:00",
-    deadlineDateTime: null,
-    summary: "과목평가 결과에 대한 피드백 세션입니다.",
-    originalUrl: "https://meeting.ssafy.com/channel/notice",
-    channelName: "공지사항",
-    category: "과목평가",
-    createdAt: "2026-06-17T10:00:00",
-  },
-  {
-    id: "19",
-    title: "특강 안내",
-    startDateTime: "2026-06-17T09:00:00",
-    deadlineDateTime: null,
-    summary: "클라우드 기초 특강이 진행됩니다. AWS 입문자 대상입니다.",
-    originalUrl: "https://meeting.ssafy.com/channel/notice",
-    channelName: "공지사항",
-    category: "공지사항",
-    createdAt: "2026-06-16T10:00:00",
-  },
-  {
-    id: "20",
-    title: "채용 설명회",
-    startDateTime: "2026-06-19T14:00:00",
-    deadlineDateTime: null,
-    summary: "파트너 기업 채용 설명회입니다. 다양한 기업의 채용 정보를 확인하세요.",
-    originalUrl: "https://meeting.ssafy.com/channel/job",
-    channelName: "취업지원",
-    category: "취업지원",
-    createdAt: "2026-06-18T09:00:00",
-  },
-  {
-    id: "21",
-    title: "프로젝트 제출",
-    startDateTime: "2026-06-11T10:00:00",
-    deadlineDateTime: "2026-06-11T23:59:00",
-    summary: "중간 프로젝트 제출 마감입니다.",
-    originalUrl: "https://meeting.ssafy.com/channel/project",
-    channelName: "프로젝트",
-    category: "프로젝트",
-    createdAt: "2026-06-10T10:00:00",
   },
 ]
 
@@ -375,6 +191,18 @@ export default function AnnouncementCalendar() {
     new Set(CATEGORIES.map((c) => c.id))
   )
 
+  // SWR을 사용한 API 데이터 페칭
+  const {
+    data: announcements,
+    error,
+    isLoading,
+    mutate,
+  } = useSWR<Announcement[]>(API_ENDPOINTS.announcements, fetcher, {
+    fallbackData: fallbackAnnouncements,
+    revalidateOnFocus: false,
+    dedupingInterval: 60000, // 1분간 중복 요청 방지
+  })
+
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
   const daysInMonth = getDaysInMonth(year, month)
@@ -405,11 +233,11 @@ export default function AnnouncementCalendar() {
       "행사/이벤트": 0,
       프로젝트: 0,
     }
-    mockAnnouncements.forEach((a) => {
+    ;(announcements || []).forEach((a) => {
       counts[a.category]++
     })
     return counts
-  }, [])
+  }, [announcements])
 
   const toggleCategory = (category: Category) => {
     const newSelected = new Set(selectedCategories)
@@ -435,10 +263,15 @@ export default function AnnouncementCalendar() {
     setSelectedDate(formatDate(today))
   }
 
+  // 새로고침 핸들러
+  const handleRefresh = () => {
+    mutate()
+  }
+
   // 필터링된 공지사항
   const filteredAnnouncements = useMemo(() => {
-    return mockAnnouncements.filter((a) => selectedCategories.has(a.category))
-  }, [selectedCategories])
+    return (announcements || []).filter((a) => selectedCategories.has(a.category))
+  }, [announcements, selectedCategories])
 
   // 특정 날짜에 해당하는 공지사항 필터링
   const getAnnouncementsForDate = (dateStr: string) => {
@@ -575,12 +408,31 @@ export default function AnnouncementCalendar() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 text-sm">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              실시간 수집 연결됨
-            </div>
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <RefreshCw className="w-4 h-4" />
+            {/* 상태 표시 */}
+            {isLoading ? (
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-yellow-500/10 text-yellow-400 text-sm">
+                <RefreshCw className="w-3 h-3 animate-spin" />
+                데이터 로딩 중...
+              </div>
+            ) : error ? (
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 text-red-400 text-sm">
+                <AlertCircle className="w-3 h-3" />
+                연결 오류 (폴백 데이터 사용)
+              </div>
+            ) : (
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 text-sm">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                실시간 수집 연결됨
+              </div>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full"
+              onClick={handleRefresh}
+              disabled={isLoading}
+            >
+              <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
               <span className="sr-only">새로고침</span>
             </Button>
             <Button variant="ghost" size="icon" className="rounded-full">
