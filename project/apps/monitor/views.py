@@ -74,12 +74,13 @@ def announcements_api(request):
     start = request.GET.get("start")
     end = request.GET.get("end")
     mattermost_url = os.getenv("MATTERMOST_URL", "").rstrip("/")
-    category_by_channel_id = {
-        "ujpfnsakg7bouq4ts83pykzbxw": "공지사항",
-        "q18dcqbshtbz3jd4831x66cbzh": "공지사항",
-        "x8xcn3utn38xbqke6zz661swqa": "취업지원",
-        "rjfryg19dbrf7nxuuf9yxc17sy": "취업지원",
-    }
+    # category_by_channel_id = {
+    #     "ujpfnsakg7bouq4ts83pykzbxw": "공지사항",
+    #     "q18dcqbshtbz3jd4831x66cbzh": "공지사항",
+    #     "x8xcn3utn38xbqke6zz661swqa": "취업지원",
+    #     "rjfryg19dbrf7nxuuf9yxc17sy": "취업지원",
+    # }
+    category = ('공지사항', '취업지원', '과목평가', '행사/이벤트')
 
     announcements = Announcement.objects.all()
     if start and end:
@@ -101,8 +102,7 @@ def announcements_api(request):
             # 모델에 해당 필드 없음
             "originalUrl": f"{mattermost_url}/pl/{announcement.message.message_id}" if mattermost_url else "",
             "channelName": announcement.message.channel_id,
-            # 모델에 해당 필드 없음
-            "category": category_by_channel_id.get(announcement.message.channel_id, "공지사항"),
+            "category": announcement.category if announcement.category in category else "공지사항",
             "createdAt": announcement.message.created_at.strftime("%Y-%m-%dT%H:%M:%S"),
         }
         for announcement in announcements
