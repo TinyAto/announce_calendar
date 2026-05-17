@@ -94,7 +94,7 @@ def announcements_api(request):
             "deadlineDateTime": announcement.deadline_dt.strftime("%Y-%m-%dT%H:%M:%S") if announcement.deadline_dt else None,
             "summary": announcement.summary,
             # 모델에 해당 필드 없음
-            "originalUrl": f"{mattermost_url}/pl/{announcement.message.message_id}" if mattermost_url else "",
+            "originalUrl": f"{mattermost_url}/s15public/pl/{announcement.message.message_id}" if mattermost_url else "",
             "channelName": announcement.message.channel_id,
             "category": announcement.category if announcement.category in category else "공지사항",
             "createdAt": announcement.message.created_at.strftime("%Y-%m-%dT%H:%M:%S"),
