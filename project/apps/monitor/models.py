@@ -43,8 +43,20 @@ class Message(models.Model):
 
 
 class Announcement(models.Model):
+    class Category(models.TextChoices):
+        NOTICE = "공지사항", "공지사항"
+        SUBJECT_EVALUATION = "과목평가", "과목평가"
+        CAREER_SUPPORT = "취업지원", "취업지원"
+        EVENT = "행사/이벤트", "행사/이벤트"
+        PROJECT = "프로젝트", "프로젝트"
+
     message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name="announcements")
     title = models.CharField(max_length=255)
+    category = models.CharField(
+        max_length=20,
+        choices=Category.choices,
+        default=Category.NOTICE,
+    )
     start_dt = models.DateTimeField(null=True, blank=True)
     deadline_dt = models.DateTimeField(null=True, blank=True)
     summary = models.TextField(blank=True, default="")

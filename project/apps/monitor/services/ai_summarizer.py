@@ -68,6 +68,16 @@ def summarize_message(message: Message):
 - "과제 제출은 5월 20일 23:59까지입니다." -> {{"title":"과제 제출","start_dt":"","deadline_dt":"YYYY-05-20 23:59:00","summary":"과제 제출 마감은 5월 20일 23시 59분까지입니다."}}
 """
 
+    prompt += """
+
+추가 규칙:
+- 처리 대상 공지라면 JSON에 반드시 category 필드를 포함해라.
+- category는 다음 다섯 값 중 정확히 하나만 사용해라: 공지사항, 과목평가, 취업지원, 행사/이벤트, 프로젝트
+- 분류가 애매하면 category는 공지사항으로 작성해라.
+- 반환 JSON 예시:
+{"title":"과제 제출","category":"공지사항","start_dt":"","deadline_dt":"YYYY-05-20 23:59:00","summary":"과제 제출 마감은 5월 20일 23시 59분까지입니다."}
+"""
+
     headers = {
         "Content-Type": "application/json",
         "Authorization": api_key,
@@ -105,6 +115,10 @@ def summarize_message(message: Message):
     if result == {}:
         return False
 
+    category = str(result.get("category") or Announcement.Category.NOTICE).strip()
+    if category not in Announcement.Category.values:
+        category = Announcement.Category.NOTICE
+
     start_dt = result.get("start_dt")
 
     if not start_dt:
@@ -128,6 +142,7 @@ def summarize_message(message: Message):
     Announcement.objects.create(
         message=message,
         title=result.get("title", "제목 없음"),
+        category=category,
         start_dt=start_dt,
         deadline_dt=deadline_dt,
         summary=result.get("summary", ""),
