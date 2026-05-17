@@ -1,10 +1,11 @@
 import os
 
 from django.conf import settings
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_GET
 
-from .models import Message
+from .models import Message, Announcement
 from .services.channel_api import get_channels
 
 
@@ -66,3 +67,32 @@ def channel_list(request):
         "error": error,
         "server_url": server_url,
     })
+
+
+@require_GET
+def announcements_api(request):
+    start = request.GET.get("start")
+    end = request.GET.get("end")
+
+    announcements = Announcement.objects.all()
+    if start and end:
+        announcements = announcements.filter(
+            start_dt__date__gte=start,
+            start_dt__date__lte=end,
+        ) | announcements.filter(
+            deadline_dt__date__gte=start,
+            deadline_dt__date__lte=end,
+        )
+
+    data = [
+        {
+            "id": announcement.id,
+            "title": announcement.title,
+            "start": announcement.start_dt.strftime("%Y-%m-%dT%H:%M:%S") if announcement.start_dt else None,
+            "end": announcement.deadline_dt.strftime("%Y-%m-%dT%H:%M:%S") if announcement.deadline_dt else None,
+            "summary": announcement.summary,
+            "channel_id": announcement.message.channel_id,
+        }
+        for announcement in announcements
+    ]
+    return JsonResponse(data, safe=False)
