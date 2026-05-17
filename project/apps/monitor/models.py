@@ -1,6 +1,7 @@
 import uuid
 
 from django.db import models
+from django.utils import timezone
 
 
 class Message(models.Model):
@@ -39,3 +40,34 @@ class Message(models.Model):
         if channel_ids:
             qs = qs.filter(channel_id__in=channel_ids)
         return qs[:limit]
+
+
+class Announcement(models.Model):
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name="announcements")
+    title = models.CharField(max_length=255)
+    start_dt = models.DateTimeField(null=True, blank=True)
+    deadline_dt = models.DateTimeField(null=True, blank=True)
+    summary = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-start_dt"]
+        verbose_name = "Announcement"
+        verbose_name_plural = "Announcements"
+
+    def __str__(self):
+        return self.title
+
+    @classmethod
+    def get_upcoming(cls, limit=20):
+        now = timezone.now()
+        return cls.objects.filter(
+            models.Q(start_dt__gte=now) | models.Q(deadline_dt__gte=now),
+            start_dt__isnull=False
+        ).order_by("start_dt")[:limit]
+
+    @classmethod
+    def get_by_date(cls, date_obj):
+        return cls.objects.filter(
+            models.Q(start_dt__date=date_obj) | models.Q(deadline_dt__date=date_obj)
+        ).order_by("start_dt")
