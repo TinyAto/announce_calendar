@@ -8,9 +8,9 @@ from datetime import datetime, timezone
 from django.core.management.base import BaseCommand
 from django.conf import settings
 
-from apps.monitor.models import Message
-from apps.monitor.services.chrome_auth import ChromeAuthExtractor
-from apps.monitor.services.reconnect import ReconnectManager
+from ...models import Message
+from ...services.chrome_auth import ChromeAuthExtractor
+from ...services.reconnect import ReconnectManager
 
 logger = logging.getLogger(__name__)
 
@@ -67,8 +67,11 @@ class Command(BaseCommand):
                 self.stderr.write(f"Chrome auth failed: {e}")
                 return
         else:
-            self.stderr.write("--no-chrome requires MATTERMOST_TOKEN in .env")
-            return
+            token = os.getenv("MATTERMOST_TOKEN")
+            if not token:
+                self.stderr.write("MATTERMOST_TOKEN not set in .env")
+                return
+            self.stdout.write(self.style.SUCCESS("Using token from .env"))
 
         if channel_names:
             from apps.monitor.services.channel_api import find_channel
