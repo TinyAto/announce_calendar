@@ -1,6 +1,6 @@
 # gjh_s1
 
-SSAFY Mattermost 공지 채널 수집 → AI 요약 → 캘린더 표시 웹서비스
+Mattermost 공지 채널 수집 → AI 요약 → 캘린더 표시 웹서비스
 
 ---
 
